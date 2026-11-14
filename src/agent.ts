@@ -19,18 +19,37 @@ export function createHarnessAgent(config: HarnessConfig = {}): Agent {
   models.setProvider(anthropicProvider());
   models.setProvider(openaiProvider());
 
+  const geminiKey = process.env.GEMINI_API_KEY?.trim();
+  const anthropicKey = process.env.ANTHROPIC_API_KEY?.trim();
+  const openaiKey = process.env.OPENAI_API_KEY?.trim();
+
   // Determine provider from config, env, or available API keys
-  let providerId = config.provider || process.env.AI_PROVIDER;
+  let providerId = config.provider || process.env.AI_PROVIDER?.trim();
   if (!providerId) {
-    if (process.env.GEMINI_API_KEY) {
+    if (geminiKey) {
       providerId = "google";
-    } else if (process.env.ANTHROPIC_API_KEY) {
+    } else if (anthropicKey) {
       providerId = "anthropic";
-    } else if (process.env.OPENAI_API_KEY) {
+    } else if (openaiKey) {
       providerId = "openai";
-    } else {
-      providerId = "google";
     }
+  }
+
+  if (!providerId) {
+    throw new Error(
+      "No API key found. Please open .env and add your GEMINI_API_KEY, ANTHROPIC_API_KEY, or OPENAI_API_KEY."
+    );
+  }
+
+  // Validate that the selected provider actually has an API key
+  if (providerId === "google" && !geminiKey) {
+    throw new Error("Provider 'google' is selected, but GEMINI_API_KEY is empty in .env.");
+  }
+  if (providerId === "anthropic" && !anthropicKey) {
+    throw new Error("Provider 'anthropic' is selected, but ANTHROPIC_API_KEY is empty in .env.");
+  }
+  if (providerId === "openai" && !openaiKey) {
+    throw new Error("Provider 'openai' is selected, but OPENAI_API_KEY is empty in .env.");
   }
 
   // Find model
@@ -41,7 +60,7 @@ export function createHarnessAgent(config: HarnessConfig = {}): Agent {
     );
   }
 
-  const requestedModelId = config.modelId || process.env.AI_MODEL;
+  const requestedModelId = config.modelId || process.env.AI_MODEL?.trim();
   let selectedModel: Model<Api> | undefined;
 
   if (requestedModelId) {

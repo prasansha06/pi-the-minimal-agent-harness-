@@ -17,9 +17,7 @@ async function main() {
     agent = createHarnessAgent();
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : String(err);
-    console.error(`Error initializing agent: ${message}`);
-    console.error("Please configure an API key in your environment or .env file:");
-    console.error("  export GEMINI_API_KEY=your_key  # or ANTHROPIC_API_KEY / OPENAI_API_KEY");
+    console.error(`\n\x1b[31mSetup Error: ${message}\x1b[0m\n`);
     process.exit(1);
   }
 
@@ -33,6 +31,18 @@ async function main() {
       case "message_update":
         if (event.assistantMessageEvent.type === "text_delta") {
           output.write(event.assistantMessageEvent.delta);
+        } else if (event.assistantMessageEvent.type === "thinking_delta") {
+          output.write(`\x1b[90m${event.assistantMessageEvent.delta}\x1b[0m`);
+        } else if (event.assistantMessageEvent.type === "error") {
+          const errMessage = event.assistantMessageEvent.error.errorMessage || "Unknown provider error";
+          output.write(`\n\x1b[31m[API Error]: ${errMessage}\x1b[0m\n`);
+        }
+        break;
+
+      case "message_end":
+        if (event.message.role === "assistant" && event.message.stopReason === "error") {
+          const errMessage = event.message.errorMessage || "Turn stopped with error";
+          output.write(`\n\x1b[31m[Model Error]: ${errMessage}\x1b[0m\n`);
         }
         break;
 
@@ -76,9 +86,12 @@ async function main() {
 
       try {
         await agent.prompt(trimmed);
+        if (agent.state.errorMessage) {
+          console.error(`\x1b[31mAgent reported error: ${agent.state.errorMessage}\x1b[0m\n`);
+        }
       } catch (promptError: unknown) {
         const message = promptError instanceof Error ? promptError.message : String(promptError);
-        console.error(`\x1b[31mError during execution: ${message}\x1b[0m\n`);
+        console.error(`\x1b[31mExecution Error: ${message}\x1b[0m\n`);
       }
     }
   } finally {
