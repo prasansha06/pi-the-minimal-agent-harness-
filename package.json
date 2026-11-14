@@ -1,0 +1,22 @@
+{
+  "name": "pi-the-minimal-agent-harness",
+  "version": "0.1.0",
+  "description": "Minimal coding agent harness built with Pi core packages",
+  "type": "module",
+  "main": "src/index.ts",
+  "scripts": {
+    "start": "tsx src/index.ts",
+    "build": "tsc",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@earendil-works/pi-agent-core": "^1.5.2",
+    "@earendil-works/pi-ai": "^1.5.2",
+    "@earendil-works/pi-schema": "^1.5.2"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.0"
+  }
+}
