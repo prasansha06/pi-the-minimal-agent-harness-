@@ -12,6 +12,13 @@ export interface HarnessConfig {
   systemPrompt?: string;
 }
 
+const DEFAULT_PROVIDER_MODELS: Record<string, string> = {
+  groq: "llama-3.3-70b-versatile",
+  google: "gemini-flash-latest",
+  anthropic: "claude-sonnet-4-6",
+  openai: "gpt-4o",
+};
+
 export function createHarnessAgent(config: HarnessConfig = {}): Agent {
   const models = createModels();
 
@@ -80,8 +87,16 @@ export function createHarnessAgent(config: HarnessConfig = {}): Agent {
     }
   }
 
+  // If no model requested or not found, try the preferred default for the provider
   if (!selectedModel) {
-    // Pick the first available chat model
+    const preferredId = DEFAULT_PROVIDER_MODELS[providerId];
+    if (preferredId) {
+      selectedModel = models.getModel(providerId, preferredId);
+    }
+  }
+
+  // Fallback to first registered model
+  if (!selectedModel) {
     selectedModel = availableModels[0];
   }
 
