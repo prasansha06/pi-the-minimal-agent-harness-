@@ -2,7 +2,7 @@
 
 A lightweight, modular coding agent harness built using the core packages from the Pi agent architecture:
 - [`@earendil-works/pi-agent-core`](https://www.npmjs.com/package/@earendil-works/pi-agent-core): The core agent loop, tool execution lifecycle, and event streaming.
-- [`@earendil-works/pi-ai`](https://www.npmjs.com/package/@earendil-works/pi-ai): Unified multi-provider LLM interface (Google Gemini, Anthropic Claude, OpenAI).
+- [`@earendil-works/pi-ai`](https://www.npmjs.com/package/@earendil-works/pi-ai): Unified multi-provider LLM interface (Groq, Google Gemini, Anthropic Claude, OpenAI).
 - [`@earendil-works/pi-schema`](https://www.npmjs.com/package/@earendil-works/pi-schema): Type-safe schema builder (TypeBox wrapper) for tool parameters.
 
 ## Architecture
@@ -16,8 +16,8 @@ This project demonstrates the minimal anatomy of an autonomous coding agent:
    - `bash`: Runs arbitrary shell commands (build, test, git).
 
 2. **Agent Setup (`src/agent.ts`)**:
-   - Registers providers (`googleProvider()`, `anthropicProvider()`, `openAiProvider()`).
-   - Resolves provider credentials from environment variables (`GEMINI_API_KEY`, `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`).
+   - Registers providers (`groqProvider()`, `googleProvider()`, `anthropicProvider()`, `openaiProvider()`).
+   - Resolves provider credentials from environment variables (`GROQ_API_KEY`, `GEMINI_API_KEY`, `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`).
    - Configures the `Agent` loop with streaming and system prompt.
 
 3. **Interactive REPL (`src/index.ts`)**:
@@ -28,7 +28,7 @@ This project demonstrates the minimal anatomy of an autonomous coding agent:
 ## Prerequisites
 
 - [Node.js](https://nodejs.org/) v22.0.0 or higher.
-- An API key for Google Gemini, Anthropic, or OpenAI.
+- An API key for Groq, Google Gemini, Anthropic, or OpenAI.
 
 ## Getting Started
 
@@ -48,9 +48,9 @@ This project demonstrates the minimal anatomy of an autonomous coding agent:
    ```bash
    cp .env.example .env
    ```
-   For example, if using Gemini:
+   For example, if using Groq:
    ```env
-   GEMINI_API_KEY=your_gemini_api_key_here
+   GROQ_API_KEY=gsk_...
    ```
 
 4. Start the interactive CLI:

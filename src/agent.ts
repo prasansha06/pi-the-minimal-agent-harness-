@@ -3,6 +3,7 @@ import { createModels, type Model, type Api } from "@earendil-works/pi-ai";
 import { anthropicProvider } from "@earendil-works/pi-ai/providers/anthropic";
 import { openaiProvider } from "@earendil-works/pi-ai/providers/openai";
 import { googleProvider } from "@earendil-works/pi-ai/providers/google";
+import { groqProvider } from "@earendil-works/pi-ai/providers/groq";
 import { defaultTools } from "./tools.js";
 
 export interface HarnessConfig {
@@ -14,11 +15,13 @@ export interface HarnessConfig {
 export function createHarnessAgent(config: HarnessConfig = {}): Agent {
   const models = createModels();
 
-  // Register common LLM providers
+  // Register supported LLM providers
+  models.setProvider(groqProvider());
   models.setProvider(googleProvider());
   models.setProvider(anthropicProvider());
   models.setProvider(openaiProvider());
 
+  const groqKey = process.env.GROQ_API_KEY?.trim();
   const geminiKey = process.env.GEMINI_API_KEY?.trim();
   const anthropicKey = process.env.ANTHROPIC_API_KEY?.trim();
   const openaiKey = process.env.OPENAI_API_KEY?.trim();
@@ -26,7 +29,9 @@ export function createHarnessAgent(config: HarnessConfig = {}): Agent {
   // Determine provider from config, env, or available API keys
   let providerId = config.provider || process.env.AI_PROVIDER?.trim();
   if (!providerId) {
-    if (geminiKey) {
+    if (groqKey) {
+      providerId = "groq";
+    } else if (geminiKey) {
       providerId = "google";
     } else if (anthropicKey) {
       providerId = "anthropic";
@@ -37,11 +42,14 @@ export function createHarnessAgent(config: HarnessConfig = {}): Agent {
 
   if (!providerId) {
     throw new Error(
-      "No API key found. Please open .env and add your GEMINI_API_KEY, ANTHROPIC_API_KEY, or OPENAI_API_KEY."
+      "No API key found. Please open .env and add GROQ_API_KEY, GEMINI_API_KEY, ANTHROPIC_API_KEY, or OPENAI_API_KEY."
     );
   }
 
   // Validate that the selected provider actually has an API key
+  if (providerId === "groq" && !groqKey) {
+    throw new Error("Provider 'groq' is selected, but GROQ_API_KEY is empty in .env.");
+  }
   if (providerId === "google" && !geminiKey) {
     throw new Error("Provider 'google' is selected, but GEMINI_API_KEY is empty in .env.");
   }
@@ -56,7 +64,7 @@ export function createHarnessAgent(config: HarnessConfig = {}): Agent {
   const availableModels = models.getModels(providerId);
   if (availableModels.length === 0) {
     throw new Error(
-      `No models registered for provider '${providerId}'. Available providers: google, anthropic, openai.`
+      `No models registered for provider '${providerId}'. Available providers: groq, google, anthropic, openai.`
     );
   }
 
